@@ -1,0 +1,38 @@
+from os.path import join
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, AppendEnvironmentVariable
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from ament_index_python.packages import get_package_share_directory
+
+## configura spawing do ambiente (variaveis e o mundo)
+def generate_launch_description():
+    pkg_ros_gz_sim = get_package_share_directory("ros_gz_sim")
+    pkg_description = get_package_share_directory("phi_p3dx_description")
+
+    world_name = LaunchConfiguration("world_name")
+    
+    set_res_path_worlds = AppendEnvironmentVariable(
+        name='GZ_SIM_RESOURCE_PATH', 
+        value=join(pkg_description, 'worlds')
+    )
+    set_res_path_models = AppendEnvironmentVariable(
+        name='GZ_SIM_RESOURCE_PATH', 
+        value=join(pkg_description, 'models')
+    )
+
+    gz_sim = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            join(pkg_ros_gz_sim, "launch", "gz_sim.launch.py")
+        ),
+        launch_arguments={
+            "gz_args": ["-r ", join(pkg_description, "worlds", ""), world_name, ".sdf"]
+        }.items(),
+    )
+
+    return LaunchDescription([
+        DeclareLaunchArgument("world_name", default_value="empty_world"),
+        set_res_path_worlds,
+        set_res_path_models,
+        gz_sim
+    ])
