@@ -6,6 +6,7 @@ from launch_ros.actions import Node
 ## configura spawing the controller a ser usado
 def generate_launch_description():
     namespace = LaunchConfiguration('robot_namespace')
+    use_sim_time = LaunchConfiguration('use_sim_time')
 
     controller_node = Node(
         package='phi_p3dx_navigation',
@@ -14,11 +15,12 @@ def generate_launch_description():
         namespace=namespace,
         output='screen',
         parameters=[{
-            'use_sim_time': True,
+            'use_sim_time': use_sim_time,
         }],
     )
 
     return LaunchDescription([
         DeclareLaunchArgument('robot_namespace', default_value=''),
+        DeclareLaunchArgument('use_sim_time', default_value='false', description='Use simulation (Gazebo) clock if true'),
         controller_node
     ])

@@ -7,19 +7,19 @@ from ament_index_python.packages import get_package_share_directory
 
 ## configura spawing do gazebo 3D
 def generate_launch_description():
-    pkg_model_bringup = get_package_share_directory("model_bringup")
-    pkg_model_description = get_package_share_directory("model_description")
+    pkg_navigation = get_package_share_directory("phi_p3dx_navigation")
+    pkg_description = get_package_share_directory("phi_p3dx_description")
     
     x = LaunchConfiguration("x")
     y = LaunchConfiguration("y")
     yaw = LaunchConfiguration("yaw")
     namespace = LaunchConfiguration("robot_namespace")
     
-    bridge_config = join(pkg_model_bringup, 'config', 'model_bridge.yaml')
+    bridge_config = join(pkg_navigation, 'config', 'model_bridge.yaml')
 
     robot_description_content = Command([
         'xacro ',
-        PathJoinSubstitution([pkg_model_description, 'urdf', 'p3dx', 'pioneer3dx.xacro']),
+        PathJoinSubstitution([pkg_description, 'urdf', 'p3dx', 'pioneer3dx.xacro']),
         ' robot_namespace:=', namespace
     ])
 

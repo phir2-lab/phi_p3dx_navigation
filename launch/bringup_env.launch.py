@@ -12,9 +12,16 @@ def generate_launch_description():
 
     world_name = LaunchConfiguration("world_name")
     
+    from ament_index_python.packages import get_package_prefix
+    pkg_install_dir = get_package_prefix("phi_p3dx_description")
+
     set_res_path_worlds = AppendEnvironmentVariable(
         name='GZ_SIM_RESOURCE_PATH', 
         value=join(pkg_description, 'worlds')
+    )
+    set_res_path_pkg = AppendEnvironmentVariable(
+        name='GZ_SIM_RESOURCE_PATH', 
+        value=join(pkg_install_dir, 'share')
     )
     set_res_path_models = AppendEnvironmentVariable(
         name='GZ_SIM_RESOURCE_PATH', 
@@ -33,6 +40,7 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument("world_name", default_value="empty_world"),
         set_res_path_worlds,
+        set_res_path_pkg,
         set_res_path_models,
         gz_sim
     ])

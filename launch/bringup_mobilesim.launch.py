@@ -12,7 +12,7 @@ def generate_launch_description():
     pkg_description = get_package_share_directory('phi_p3dx_description')
     pkg_navigation = get_package_share_directory('phi_p3dx_navigation')
 
-    map_file = join(pkg_description, 'map', 'indoor.map')
+    map_file = join(pkg_description, 'map', 'obstacles.map')
 
     port_arg = DeclareLaunchArgument(
         'port', default_value='localhost:8101',
@@ -39,9 +39,9 @@ def generate_launch_description():
         period=3.0,
         actions=[
             Node(
-                package='phi_aria',
+                package='phi_p3dx_aria',
                 executable='phi_p3dx',
-                name='phi_aria',
+                name='phi_p3dx_aria',
                 namespace=namespace,
                 output='screen',
                 parameters=[{
@@ -69,6 +69,7 @@ def generate_launch_description():
             ),
         ],
     )
+    
 
     rviz_launch = TimerAction(
         period=4.0,

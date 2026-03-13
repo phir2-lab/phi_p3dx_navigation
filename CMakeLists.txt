@@ -17,7 +17,7 @@ find_package(nav_msgs REQUIRED)
 
 find_package(ros_gz_sim REQUIRED)
 find_package(ros_gz_bridge REQUIRED)
-find_package(model_description REQUIRED)
+
 
 # ---------- C++ executable node ----------
 add_executable(controller_cpp src/controller.cpp)
@@ -42,6 +42,13 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   scripts/wall_follower.py
   DESTINATION lib/${PROJECT_NAME}
+  RENAME wall_follower
+)
+
+install(PROGRAMS
+  scripts/wall_follow.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME wall_follow
 )
 
 if(BUILD_TESTING)

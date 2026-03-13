@@ -49,12 +49,13 @@ def generate_launch_description():
     navigation_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(join(pkg_navigation, "launch", "bringup_navigation.launch.py")),
         launch_arguments={
-            'robot_namespace': namespace
+            'robot_namespace': namespace,
+            'use_sim_time': 'true'
         }.items()
     )
 
     return LaunchDescription([
-        DeclareLaunchArgument("world_name", default_value="obstacle2x2"),
+        DeclareLaunchArgument("world_name", default_value="obstacles"),
         DeclareLaunchArgument("robot_namespace", default_value=""),
         DeclareLaunchArgument("x", default_value="0.0"),
         DeclareLaunchArgument("y", default_value="0.5"),
