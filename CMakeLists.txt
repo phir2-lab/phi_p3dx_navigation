@@ -40,9 +40,9 @@ install(DIRECTORY launch config scripts
 ament_python_install_package(${PROJECT_NAME})
 
 install(PROGRAMS
-  scripts/wall_follower.py
+  scripts/potential_field.py
   DESTINATION lib/${PROJECT_NAME}
-  RENAME wall_follower
+  RENAME potential_field
 )
 
 install(PROGRAMS

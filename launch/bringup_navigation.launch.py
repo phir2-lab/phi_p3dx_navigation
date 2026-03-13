@@ -10,8 +10,8 @@ def generate_launch_description():
 
     controller_node = Node(
         package='phi_p3dx_navigation',
-        executable='wall_follow',
-        name='wall_follow',
+        executable='potential_field',
+        name='potential_field',
         namespace=namespace,
         output='screen',
         parameters=[{
