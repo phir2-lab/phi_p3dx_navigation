@@ -1,21 +1,28 @@
+"""
+Launch auxiliar para configurar RViz.
+
+Este launch:
+- Lança RViz com configuração padrão para visualização do robô.
+
+Argumentos:
+- rviz_config: Caminho para config RViz (padrão: rviz.rviz).
+- use_sim_time: Usar tempo de simulação (padrão: false).
+- robot_namespace: Namespace para o robô.
+
+Incluído por: bringup_gazebo.launch.py, bringup_mobilesim.launch.py
+"""
+
 from os.path import join
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration, Command
+from launch.substitutions import LaunchConfiguration
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
 
 ## configura spawing de rviz
 def generate_launch_description():
     pkg_description = get_package_share_directory("phi_p3dx_description")
-
-    urdf_file = join(pkg_description, "urdf", "p3dx", "pioneer3dx.xacro")
-
-    robot_description = ParameterValue(
-        Command(['xacro ', urdf_file]),
-        value_type=str
-    )
 
     rviz_config_arg = DeclareLaunchArgument(
         "rviz_config",
@@ -48,28 +55,9 @@ def generate_launch_description():
         ],
     )
 
-    robot_state_node = Node(
-            package='robot_state_publisher',
-            executable='robot_state_publisher',
-            parameters=[{
-                'robot_description': robot_description,
-                'use_sim_time': use_sim_time,
-            }],
-            output='screen'
-        )
-
-    joint_state_node = Node(
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
-        parameters=[{'use_sim_time': use_sim_time}],
-        output='screen',
-    )
-
     return LaunchDescription([
         rviz_config_arg,
         use_sim_time_arg,
         namespace_arg,
-        robot_state_node,
-        joint_state_node,
         rviz_node,
     ])

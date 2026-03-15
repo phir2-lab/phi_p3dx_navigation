@@ -14,22 +14,28 @@ find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 find_package(ros_gz_sim REQUIRED)
 find_package(ros_gz_bridge REQUIRED)
 
 
+include_directories(include)
+
 # ---------- C++ executable node ----------
-add_executable(controller_cpp src/controller.cpp)
-ament_target_dependencies(controller_cpp
+add_executable(control_example_cpp src/control_example.cpp src/navigation_node.cpp)
+ament_target_dependencies(control_example_cpp
   rclcpp
   std_msgs
   geometry_msgs
   sensor_msgs
   nav_msgs
+  tf2
+  tf2_geometry_msgs
 )
 
-install(TARGETS controller_cpp
+install(TARGETS control_example_cpp
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -40,15 +46,9 @@ install(DIRECTORY launch config scripts
 ament_python_install_package(${PROJECT_NAME})
 
 install(PROGRAMS
-  scripts/potential_field.py
+  scripts/control_example.py
   DESTINATION lib/${PROJECT_NAME}
-  RENAME potential_field
-)
-
-install(PROGRAMS
-  scripts/wall_follow.py
-  DESTINATION lib/${PROJECT_NAME}
-  RENAME wall_follow
+  RENAME control_example_py
 )
 
 if(BUILD_TESTING)

@@ -1,3 +1,21 @@
+"""
+Launch principal para simulação 2D com MobileSim.
+
+Este launch configura e inicia:
+- O simulador MobileSim com um mapa (obstacles.map).
+- O driver phi_p3dx_aria para conectar ao MobileSim via rede.
+- RViz opcionalmente para visualização.
+- COMENTADO - O nó de navegação (obstacle_avoidance) para controle do robô.
+
+Argumentos:
+- port: Endereço do MobileSim (padrão: 'localhost:8101').
+- robot_namespace: Namespace para o robô (padrão: vazio).
+- use_rviz: Se deve abrir RViz (padrão: true).
+
+Exemplo de uso:
+  ros2 launch phi_p3dx_navigation bringup_mobilesim.launch.py port:=192.168.1.100:8101
+"""
+
 from os.path import join
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, ExecuteProcess, TimerAction, IncludeLaunchDescription
@@ -30,6 +48,16 @@ def generate_launch_description():
     namespace = LaunchConfiguration('robot_namespace')
     use_rviz  = LaunchConfiguration('use_rviz')
 
+    state_publishers = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            join(pkg_navigation, 'launch', 'includes', 'bringup_state_publishers.launch.py')
+        ),
+        launch_arguments={
+            'robot_namespace': namespace,
+            'use_sim_time': 'false'
+        }.items()
+    )
+
     mobilesim = ExecuteProcess(
         cmd=['MobileSim', '-m', map_file],
         output='screen',
@@ -61,7 +89,7 @@ def generate_launch_description():
         actions=[
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
-                    join(pkg_navigation, 'launch', 'bringup_navigation.launch.py')
+                    join(pkg_navigation, 'launch', 'includes', 'bringup_navigation.launch.py')
                 ),
                 launch_arguments={
                     'robot_namespace': namespace
@@ -76,7 +104,7 @@ def generate_launch_description():
         actions=[
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource(
-                    join(pkg_navigation, 'launch', 'bringup_rviz.launch.py')
+                    join(pkg_navigation, 'launch', 'includes', 'bringup_rviz.launch.py')
                 ),
                 condition=IfCondition(use_rviz),
                 launch_arguments={
@@ -92,8 +120,9 @@ def generate_launch_description():
         namespace_arg,
         use_rviz_arg,
 
+        state_publishers,
         mobilesim,
         phi_aria_node,
-        navigation,
         rviz_launch,
+        # navigation,
     ])

@@ -1,3 +1,18 @@
+"""
+Launch principal para controle do robô real Pioneer 3-DX.
+
+Este launch configura e inicia:
+- O driver phi_aria para conectar ao robô via rede (porta serial/TCP).
+- O nó de navegação (obstacle_avoidance) para controle do robô.
+
+Argumentos:
+- port: Endereço do robô (padrão: '192.168.1.11:10002').
+- robot_namespace: Namespace para o robô (padrão: vazio).
+
+Exemplo de uso:
+  ros2 launch phi_p3dx_navigation bringup_robot.launch.py port:=192.168.1.100:10002
+"""
+
 from os.path import join
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
@@ -9,6 +24,7 @@ from ament_index_python.packages import get_package_share_directory
 ## configura spawing do robô real
 def generate_launch_description():
     pkg_phi_aria = get_package_share_directory('phi_aria')
+    pkg_navigation = get_package_share_directory('phi_p3dx_navigation')
 
     port_arg = DeclareLaunchArgument(
         'port', default_value='192.168.1.11:10002',
@@ -24,6 +40,14 @@ def generate_launch_description():
 
     port      = LaunchConfiguration('port')
     namespace = LaunchConfiguration('robot_namespace')
+
+    state_publishers = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(join(pkg_navigation, "launch", "includes", "bringup_state_publishers.launch.py")),
+        launch_arguments={
+            'robot_namespace': namespace,
+            'use_sim_time': 'false'
+        }.items()
+    )
 
     phi_aria_node = Node(
         package='phi_aria',
@@ -42,7 +66,7 @@ def generate_launch_description():
     )
 
     navigation_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(join(pkg_navigation, "launch", "bringup_navigation.launch.py")),
+        PythonLaunchDescriptionSource(join(pkg_navigation, "launch", "includes", "bringup_navigation.launch.py")),
         launch_arguments={
             'robot_namespace': namespace
         }.items()
@@ -53,6 +77,7 @@ def generate_launch_description():
         port_arg,
         namespace_arg,
 
+        state_publishers,
         phi_aria_node,
         navigation_launch,
     ])

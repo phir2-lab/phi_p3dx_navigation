@@ -1,3 +1,23 @@
+"""
+Launch principal para simulação completa no Gazebo 3D.
+
+Este launch configura e inicia:
+- O ambiente Gazebo com um mundo SDF (ex.: empty_world ou obstacles).
+- O robô Pioneer 3-DX spawnado no mundo, com publishers de estado (robot_state_publisher, joint_state_publisher).
+- A ponte ROS-Gazebo para comunicação entre ROS e Gazebo.
+- RViz opcionalmente para visualização (padrão: ligado).
+- COMENTADO - O nó de navegação (obstacle_avoidance) para controle do robô.
+
+Argumentos:
+- world_name: Nome do mundo SDF a carregar (padrão: 'obstacles').
+- robot_namespace: Namespace para o robô (padrão: vazio).
+- x, y, yaw: Posição inicial do robô no mundo.
+- use_rviz: Se deve abrir RViz (padrão: true).
+
+Exemplo de uso:
+  ros2 launch phi_p3dx_navigation bringup_gazebo.launch.py world_name:=empty_world use_rviz:=false
+"""
+
 from os.path import join
 from launch.conditions import IfCondition
 from launch import LaunchDescription
@@ -19,11 +39,12 @@ def generate_launch_description():
     use_rviz = LaunchConfiguration("use_rviz")
 
     world_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(join(pkg_navigation, "launch", "bringup_env.launch.py")),
+        PythonLaunchDescriptionSource(join(pkg_navigation, "launch", "includes", "bringup_env.launch.py")),
         launch_arguments={'world_name': world_name}.items()
     )
+
     robot_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(join(pkg_navigation, "launch", "bringup_spawn_gz.launch.py")),
+        PythonLaunchDescriptionSource(join(pkg_navigation, "launch", "includes", "bringup_spawn_gz.launch.py")),
         launch_arguments={
             'x': x,
             'y': y,
@@ -32,11 +53,19 @@ def generate_launch_description():
         }.items()
     )
 
+    state_publishers = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(join(pkg_navigation, "launch", "includes", "bringup_state_publishers.launch.py")),
+        launch_arguments={
+            'robot_namespace': namespace,
+            'use_sim_time': 'true'
+        }.items()
+    )
+
     rviz_launch = TimerAction(
         period=3.0,
         actions=[
             IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(join(pkg_navigation, "launch", "bringup_rviz.launch.py")),
+                PythonLaunchDescriptionSource(join(pkg_navigation, "launch", "includes", "bringup_rviz.launch.py")),
                 condition=IfCondition(use_rviz),
                 launch_arguments={
                     'robot_namespace': namespace,
@@ -47,7 +76,7 @@ def generate_launch_description():
     )
 
     navigation_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(join(pkg_navigation, "launch", "bringup_navigation.launch.py")),
+        PythonLaunchDescriptionSource(join(pkg_navigation, "launch", "includes", "bringup_navigation.launch.py")),
         launch_arguments={
             'robot_namespace': namespace,
             'use_sim_time': 'true'
@@ -63,7 +92,8 @@ def generate_launch_description():
         DeclareLaunchArgument("use_rviz", default_value="true"),
         
         world_launch,
+        state_publishers,
         robot_launch,
         rviz_launch,
-        navigation_launch
+        # navigation_launch
     ])

@@ -1,3 +1,16 @@
+"""
+Launch auxiliar para o nó de navegação.
+
+Este launch:
+- Lança o nó obstacle_avoidance para controle reativo de desvio de obstáculos.
+
+Argumentos:
+- robot_namespace: Namespace.
+- use_sim_time: Usar tempo de simulação.
+
+Incluído por: bringup_gazebo.launch.py, bringup_mobilesim.launch.py, bringup_robot.launch.py
+"""
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
@@ -10,8 +23,8 @@ def generate_launch_description():
 
     controller_node = Node(
         package='phi_p3dx_navigation',
-        executable='potential_field',
-        name='potential_field',
+        executable='obstacle_avoidance',
+        name='obstacle_avoidance',
         namespace=namespace,
         output='screen',
         parameters=[{

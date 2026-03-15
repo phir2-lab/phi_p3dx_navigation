@@ -1,7 +1,20 @@
+"""
+Launch auxiliar para configurar o ambiente Gazebo.
+
+Este launch:
+- Define variáveis de ambiente (GZ_SIM_RESOURCE_PATH) para mundos e modelos.
+- Lança o Gazebo com um mundo SDF especificado.
+
+Argumentos:
+- world_name: Nome do mundo SDF (padrão: 'empty_world').
+
+Incluído por: bringup_gazebo.launch.py
+"""
+
 from os.path import join
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, AppendEnvironmentVariable
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 

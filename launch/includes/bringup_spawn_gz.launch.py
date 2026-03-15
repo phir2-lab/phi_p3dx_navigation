@@ -1,7 +1,23 @@
+"""
+Launch auxiliar para spawnar o robô no Gazebo.
+
+Este launch:
+- Gera a descrição do robô (URDF/XACRO).
+- Spawna o robô no Gazebo via ros_gz_sim/create.
+- Lança a ponte ros_gz_bridge para comunicação ROS-Gazebo.
+
+Argumentos:
+- x, y, yaw: Posição inicial.
+- robot_namespace: Namespace.
+
+Incluído por: bringup_gazebo.launch.py
+"""
+
 from os.path import join
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.substitutions import LaunchConfiguration, Command, PathJoinSubstitution
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
@@ -22,15 +38,6 @@ def generate_launch_description():
         PathJoinSubstitution([pkg_description, 'urdf', 'p3dx', 'pioneer3dx.xacro']),
         ' robot_namespace:=', namespace
     ])
-
-    robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
-        namespace=namespace,
-        output='screen',
-        parameters=[{'robot_description': robot_description_content}],
-    )
 
     spawn_entity = Node(
         package='ros_gz_sim',
@@ -62,7 +69,6 @@ def generate_launch_description():
         DeclareLaunchArgument("yaw", default_value="0.0"),
         DeclareLaunchArgument("robot_namespace", default_value=""),
         
-        robot_state_publisher,
         spawn_entity,
         bridge
     ])
