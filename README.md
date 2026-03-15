@@ -99,6 +99,15 @@ The `phi_p3dx_navigation` package provides:
   doxygen     # Generate docs in html/
   ```
 
+## Alternative Branches
+
+- **`mobilesim-only`**: A version without Gazebo support, focused only on MobileSim (2D) and real robot navigation. This branch removes Gazebo dependencies and launch files for users who prefer to stick with ROS2 Humble's default Gazebo Classic or don't need 3D simulation.
+
+  To use this branch:
+  ```bash
+  git checkout mobilesim-only
+  ```
+
 ## License
 
 This project is distributed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
