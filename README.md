@@ -1,12 +1,12 @@
 # phi_p3dx_navigation
 
-This repository contains ROS2 packages for autonomous navigation of the Pioneer P3-DX robot in different environments: Gazebo simulation (3D), MobileSim (2D), and real robot.
+This repository contains ROS2 packages for autonomous navigation of the Pioneer P3-DX robot in different environments: MobileSim (2D) and real robot.
 
 ## Overview
 
 The `phi_p3dx_navigation` package provides:
 - **Reactive navigation nodes**: Simple control implementations for obstacle avoidance and goal reaching.
-- **Multi-platform compatibility**: Works in Gazebo, MobileSim, and physical robots.
+- **Multi-platform compatibility**: Works in MobileSim and physical robots.
 - **Educational examples**: Commented code in Python and C++ for robotics students.
 
 ### Package Structure
@@ -20,7 +20,7 @@ The `phi_p3dx_navigation` package provides:
 ## Prerequisites
 
 - **ROS2 Humble** (or compatible).
-- **Gazebo** (for 3D simulation).
+
 - **MobileSim** (for 2D simulation, if available).
 - Dependencies: `rclcpp`, `geometry_msgs`, `sensor_msgs`, `nav_msgs`, `tf2`.
 
@@ -40,26 +40,6 @@ The `phi_p3dx_navigation` package provides:
    ```
 
 ## Usage
-
-### Gazebo Simulation (3D)
-
-1. Launch the simulation:
-   ```bash
-   ros2 launch phi_p3dx_navigation bringup_gazebo.launch.py
-   ```
-2. Run the navigation node (Python):
-   ```bash
-   ros2 run phi_p3dx_navigation control_example_py
-   ```
-
-   Or in C++:
-   ```bash
-   ros2 run phi_p3dx_navigation control_example_cpp
-   ```
-
-3. In RViz:
-   - Use "2D Nav Goal" to send goals.
-
 
 ### MobileSim Simulation (2D)
 
