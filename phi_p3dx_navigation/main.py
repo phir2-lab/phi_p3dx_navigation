@@ -26,7 +26,8 @@ from rclpy.qos import qos_profile_sensor_data
 
 from geometry_msgs.msg import Twist, PoseStamped
 from nav_msgs.msg import Odometry
-from sensor_msgs.msg import LaserScan
+from sensor_msgs.msg import LaserScan, PointCloud2
+from sensor_msgs_py import point_cloud2
 
 
 def yaw_from_quaternion(x: float, y: float, z: float, w: float) -> float:
@@ -77,6 +78,10 @@ class NavigationNode(Node):
         self.laser_angle_max: float = 0.0
         self.laser_angle_increment: float = 0.0
 
+        # Dados do sonar
+        self.sonar_ranges: np.ndarray = np.array([])
+        self.sonar_angles: np.ndarray = np.array([])
+
         # Objetivo de navegação (definido pelo RViz)
         self.goal: tuple | None = None
         self.goal_theta: float = 0.0
@@ -90,6 +95,10 @@ class NavigationNode(Node):
 
         self.create_subscription(
             LaserScan, '/laser_scan', self._cb_laser,
+            qos_profile=qos_profile_sensor_data)
+
+        self.create_subscription(
+            PointCloud2, '/sonar_cloud', self._cb_sonar,
             qos_profile=qos_profile_sensor_data)
 
         # /goal_pose é publicado pelo botão "2D Nav Goal" do RViz2
@@ -137,6 +146,42 @@ class NavigationNode(Node):
         self.laser_angle_increment = msg.angle_increment
         self.on_laser()
 
+    def print_sonar_pairs(self):
+        if self.sonar_ranges is None or len(self.sonar_ranges) == 0:
+            return
+
+        s = ""
+        for r, a in zip(self.sonar_ranges, self.sonar_angles):
+            s += f"({a:.0f}°,{r:.2f}) "
+
+        self.get_logger().info(s)
+
+    def _cb_sonar(self, msg: PointCloud2) -> None:
+        """
+        Callback para mensagens de sonar (PointCloud2).
+
+        Extrai pontos (x,y,z), calcula distância e ângulo.
+        """
+
+        ranges = []
+        angles = []
+
+        for p in point_cloud2.read_points(msg, field_names=("x", "y", "z"), skip_nans=True):
+            x, y, z = p
+
+            dist = math.sqrt(x*x + y*y)
+            angle = math.degrees(math.atan2(y, x))
+
+            ranges.append(dist)
+            angles.append(angle)
+
+        self.sonar_ranges = np.array(ranges, dtype=float)
+        self.sonar_angles = np.array(angles, dtype=float)
+
+        # self.print_sonar_pairs()
+
+        self.on_sonar()
+
     def _cb_goal(self, msg: PoseStamped) -> None:
         """
         Callback para objetivos de navegação (/goal_pose).
@@ -171,6 +216,14 @@ class NavigationNode(Node):
         """
         pass
 
+    def on_sonar(self) -> None:
+        """
+        Hook chamado após receber dados do sonar.
+
+        Sobrescreva em subclasses para processar leituras do sonar.
+        """
+        pass
+
     def on_goal(self) -> None:
         """
         Hook chamado após receber um novo objetivo.
@@ -196,6 +249,15 @@ class NavigationNode(Node):
             True se o array de ranges não estiver vazio.
         """
         return len(self.laser_ranges) > 0
+
+    def has_sonar_data(self) -> bool:
+        """
+        Verifica se há dados válidos do sonar.
+
+        Returns:
+            True se o array de ranges não estiver sonar.
+        """
+        return len(self.sonar_ranges) > 0
 
     def get_region_distance(self, idx_start: int, idx_end: int) -> float:
         """
