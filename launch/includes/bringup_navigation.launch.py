@@ -23,8 +23,8 @@ def generate_launch_description():
 
     controller_node = Node(
         package='phi_p3dx_navigation',
-        executable='obstacle_avoidance',
-        name='obstacle_avoidance',
+        executable='control_example_py',
+        name='control_example_py',
         namespace=namespace,
         output='screen',
         parameters=[{
