@@ -24,6 +24,11 @@ NavigationNode::NavigationNode(const std::string &node_name, double timer_period
     "laser_scan", 10,
     std::bind(&NavigationNode::laser_callback, this, std::placeholders::_1));
 
+  // Subscriber: sonar point cloud
+  sonar_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
+    "sonar_cloud", 10,
+    std::bind(&NavigationNode::sonar_callback, this, std::placeholders::_1));
+
   // Subscriber: objetivo de navegação
   goal_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
     "goal_pose", 10,
@@ -72,6 +77,31 @@ void NavigationNode::laser_callback(const sensor_msgs::msg::LaserScan::SharedPtr
   on_laser();
 }
 
+void NavigationNode::sonar_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
+{
+  sonar_ranges_.clear();
+
+  int numbytes = msg->data.size();
+  int numfields = msg->fields.size();
+  int numSonars = msg->width;
+
+  float x,y,z;
+    
+  sonar_ranges_.clear();
+  sonar_angles_.clear();
+  for(int n=0; n<numSonars; n++){
+      memcpy (&x, &msg->data[n * msg->point_step + msg->fields[0].offset], sizeof (float));
+      memcpy (&y, &msg->data[n * msg->point_step + msg->fields[1].offset], sizeof (float));
+      memcpy (&z, &msg->data[n * msg->point_step + msg->fields[2].offset], sizeof (float));        
+      sonar_ranges_.push_back(sqrt(pow(x,2.0)+pow(y,2.0)));
+      sonar_angles_.push_back(atan2(y,x)*180.0/M_PI);
+      // RCLCPP_INFO(this->get_logger(), "sonar %d - %d° %.2f",n, sonar_angles_[n], sonar_ranges_[n]);
+  }
+  
+
+  on_sonar();
+}
+
 void NavigationNode::goal_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg)
 {
   goal_ = std::make_tuple(msg->pose.position.x, msg->pose.position.y);
@@ -103,6 +133,11 @@ std::tuple<double, double, double> NavigationNode::get_pose() const
 bool NavigationNode::has_laser_data() const
 {
   return !laser_ranges_.empty();
+}
+
+bool NavigationNode::has_sonar_data() const
+{
+  return !sonar_ranges_.empty();
 }
 
 double NavigationNode::get_region_distance(size_t idx_start, size_t idx_end) const

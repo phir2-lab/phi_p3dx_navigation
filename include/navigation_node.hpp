@@ -4,6 +4,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 
@@ -63,6 +64,13 @@ public:
    * @return True se o array de ranges não estiver vazio.
    */
   bool has_laser_data() const;
+
+  /**
+   * @brief Verifica se há dados válidos do sonar.
+   *
+   * @return True se o array de ranges não estiver vazio.
+   */
+  bool has_sonar_data() const;
 
   /**
    * @brief Calcula a distância mínima em uma região específica do scan laser.
@@ -135,6 +143,13 @@ public:
   virtual void on_laser() {}
 
   /**
+   * @brief Hook chamado após receber dados do sonar.
+   *
+   * Sobrescreva em subclasses para processar leituras do sensor.
+   */
+  virtual void on_sonar() {}
+
+  /**
    * @brief Hook chamado após receber um novo objetivo.
    *
    * Sobrescreva em subclasses para iniciar navegação.
@@ -149,6 +164,10 @@ protected:
   std::vector<float> laser_ranges_;
   double laser_angle_min_, laser_angle_max_, laser_angle_increment_;
 
+  // Dados do sonar
+  std::vector<float> sonar_ranges_;
+  std::vector<int> sonar_angles_;
+
   // Objetivo de navegação (definido pelo RViz)
   std::tuple<double, double> goal_;
   double goal_theta_;
@@ -158,12 +177,14 @@ protected:
   rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr laser_sub_;
+  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sonar_sub_;
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr goal_sub_;
   rclcpp::TimerBase::SharedPtr timer_;
 
   // Callbacks
   void odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg);
   void laser_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg);
+  void sonar_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg);
   void goal_callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
 
   /**
