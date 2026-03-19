@@ -17,6 +17,7 @@ Exemplo de uso:
 """
 
 from os.path import join
+from launch.substitutions import PathJoinSubstitution
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, ExecuteProcess, TimerAction, IncludeLaunchDescription
 from launch.conditions import IfCondition
@@ -30,10 +31,13 @@ def generate_launch_description():
     pkg_description = get_package_share_directory('phi_p3dx_description')
     pkg_navigation = get_package_share_directory('phi_p3dx_navigation')
 
-    map_file = join(pkg_description, 'map', 'obstacles.map')
 
     port_arg = DeclareLaunchArgument(
         'port', default_value='localhost:8101',
+        description='')
+
+    map_arg = DeclareLaunchArgument(
+        'map_name', default_value='obstacles.map',
         description='')
 
     namespace_arg = DeclareLaunchArgument(
@@ -47,6 +51,9 @@ def generate_launch_description():
     port      = LaunchConfiguration('port')
     namespace = LaunchConfiguration('robot_namespace')
     use_rviz  = LaunchConfiguration('use_rviz')
+    map_name  = LaunchConfiguration('map_name')
+
+    map_file = PathJoinSubstitution([pkg_description, 'map', map_name]) 
 
     state_publishers = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -119,6 +126,7 @@ def generate_launch_description():
         port_arg,
         namespace_arg,
         use_rviz_arg,
+        map_arg,
 
         state_publishers,
         mobilesim,
